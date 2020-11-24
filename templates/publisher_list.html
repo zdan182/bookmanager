@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}出版社列表{% endblock %}</title>
+    {% load static %} {# 引入静态文件（两种方式），对应settings.py中的STATIC_URL = '/static/' #}
+    {# 方式一 #}
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.3.7-dist/css/bootstrap.min.css' %}">
+    {# 获得static前缀方式二 #}
+    <link rel="stylesheet" href="{% get_static_prefix %}css/dashboard.css ">
+
+</head>
+<body>
+{% include 'nav.html' %} {#组件#}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="{% block pub_active %}active{% endblock %}"><a href="{% url 'publist' %}">出版社</a></li>
+                <li class="{% block book_active %}{% endblock %}"><a href="{% url 'booklist' %}">书籍</a></li>
+                <li class="{% block author_active %}{% endblock %}"><a href="{% url 'authorlist' %}">作者</a></li>
+                <li class="{% block upload_active %}{% endblock %}"><a href="{% url 'upload' %}">文件上传</a></li>
+            </ul>
+        </div>
+        {% block list %}       {#模板#}
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <h2 class="sub-header">出版社列表</h2>
+                <div style="margin-bottom: 5px">
+                    <a class="btn btn-primary btn-sm" href="{% url 'pubadd' %}">新增</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover table-condensed">
+                        <thead>
+                        <tr class="success">
+                            <th>序号</th>
+                            <th>出版社编码</th>
+                            <th>出版社名称</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i in publisher_list %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ i.id }}</td>
+                                <td>{{ i.name }}</td>
+                                <td>
+                                    <a class="btn btn-danger btn-sm" href="/publisher_del?nid={{ i.id }}">删除</a>
+                                    <a class="btn btn-info btn-sm" href="/publisher_edit/{{ i.id }}/">编辑</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% load mytags %}
+                {% pagination 5 %}
+            </div>
+        {% endblock %}
+    </div>
+</div>
+</body>
+</html>
+
+{% comment %}
+自定义过滤器
+    1、在已注册的app包下创建一个python包，包的名称命名为templatetags;
+    2、在python包中新建一个py文件，名字可自己定义(如：mytags.py)
+    3、在py文件中写入代码：
+        from django import template
+        register = template.Library()
+    4、写自定义函数 + 装饰器
+        @register.filter
+        def add_arg(value,arg):
+            return 'xxx'
+    5、使用
+        {% load mytags %}
+        {{ 'xx'|add_arg:'xxx' }}
+{% endcomment %}
